@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+    <title>获取设备摄像头 getUserMedia</title>
+    <style>
+        video {
+            display: block;
+            margin: 0 auto;
+            width: 240px;
+            height: 240px;
+            background: #000;
+            border-radius: 5px;
+        }
+
+        p.red_color {
+            color: red;
+        }
+
+        #video>*,
+        .btns {
+            display: block;
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="video"></div>
+    <div class="btns">
+        <button id="open">打开</button>
+        <button id="uploadOrDispose">上传 | 处理 二维码</button>
+        <button id="close">关闭</button>
+    </div>
+    <div id="result"></div>
+</body>
+<script src="imgScan.js"></script>
+<script>
+    var ds = null;
+    var scan = new imgScan('video');
+    var re_div = document.getElementById('result');
+
+    function showError(e) {
+        var p = document.createElement('p');
+        p.className = 'red_color';
+        p.innerHTML = 'ERROR: ' + e.message;
+        re_div.appendChild(p)
+    }
+
+    function startScan() {
+        try {
+            scan.updateImage()
+        } catch (e) {
+            showError(e);
+        }
+    };
+
+    document.getElementById('open').onclick = function () {
+        scan.openScan();
+        ds = window.setInterval(function () {
+            startScan();
+        }, 1500);
+    };
+
+    document.getElementById('uploadOrDispose').onclick = function () {
+        var p = document.createElement('p');
+        // 上传或处理
+        try {
+            scan.getBlob(function (blob) {
+                console.log('blob', blob)
+            })
+            scan.getBase64(function (base64) {
+                console.log('base64', base64)
+            })
+        } catch (e) {
+            showError(e);
+        }
+    };
+
+    document.getElementById('close').onclick = function () {
+        scan.closeScan();
+        window.clearInterval(ds);
+    };
+</script>
+
+</html>
